@@ -5,6 +5,7 @@ using System.Configuration;
 using System.IO;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace RedisGeoDemo
 {
@@ -20,14 +21,20 @@ namespace RedisGeoDemo
             Console.WriteLine("Loading Resturants..");
             var redisList = ImportResturantData(connectionString);
 
+            Console.WriteLine(string.Format("Resturants Count: {0}",
+                redisList.Count));
             Console.WriteLine("Searching Resturants within 25 miles");
 
             Latitude = 36.0586094;
             Longitude = -78.9279599;
 
+            var stopWatch = new Stopwatch();
+            stopWatch.Start();
             var filteredResturants = SearchResturantsWithInSpecifiedMiles(redisList, 25);
+            stopWatch.Stop();
 
-            Console.WriteLine("Completed Searching for Resturants..");
+            Console.WriteLine(string.Format("Completed Searching for Resturants in {0} seconds",
+                stopWatch.Elapsed.TotalSeconds));
             Console.ReadLine();
         }
 
