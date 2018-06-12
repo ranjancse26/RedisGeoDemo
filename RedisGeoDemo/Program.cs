@@ -6,6 +6,7 @@ using System.IO;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Diagnostics;
+using StackExchange.Redis;
 
 namespace RedisGeoDemo
 {
@@ -13,6 +14,7 @@ namespace RedisGeoDemo
     {
         private static double Latitude { get; set; }
         private static double Longitude { get; set; }
+        private static RedisStore store;
 
         static void Main(string[] args)
         {
@@ -35,6 +37,8 @@ namespace RedisGeoDemo
 
             Console.WriteLine(string.Format("Completed Searching for Resturants in {0} seconds",
                 stopWatch.Elapsed.TotalSeconds));
+
+            store.Dispose();
             Console.ReadLine();
         }
 
@@ -58,12 +62,13 @@ namespace RedisGeoDemo
 
         public static RedisList<Restaurant> ImportResturantData(string connectionString)
         {
-            var store = new RedisStore(connectionString);
+            store = new RedisStore(connectionString);
             var redis = store.GetDatabase();
 
             var resturantsData = File.ReadAllText("restaurants-data.json");
             var resturantsCollection = JsonConvert.DeserializeObject<Restaurant[]>(resturantsData);
 
+            redis.KeyDelete("resturants", CommandFlags.FireAndForget);
             var redisCollection = new RedisList<Restaurant>("resturants", redis);
 
             double latitude = 0;
